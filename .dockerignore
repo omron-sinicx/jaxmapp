@@ -1,6 +1,7 @@
 .git/
 .venv/
 data/
+data_example/
 log/
 outputs/
 **/.egg-info/

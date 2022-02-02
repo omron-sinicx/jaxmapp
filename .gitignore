@@ -9,6 +9,6 @@ outputs/
 **/build
 **/dist
 **/*.c
-**/**.so
+**/*.so
 docs/_build
 tutorials/.ipynb_checkpoints/*

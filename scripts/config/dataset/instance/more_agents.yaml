@@ -1,0 +1,9 @@
+_target_: jaxmapp.env.instance.InstanceGeneratorCircleObs
+num_agents_min: 31 
+num_agents_max: 40
+max_speeds_cands: [0.03125]
+rads_cands: [0.015625]
+obs_size_lower_bound: 0.05
+obs_size_upper_bound: 0.08
+num_obs: 10
+map_size: 160

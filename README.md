@@ -18,7 +18,7 @@ The code has been tested on Ubuntu 16.04 and 18.04, as well as WSL2 (Ubuntu 20.0
 
 ```console
 $ python -m venv .venv
-$ source activate .venv/bin/activate
+$ source .venv/bin/activate
 (.venv) $ make
 ```
 

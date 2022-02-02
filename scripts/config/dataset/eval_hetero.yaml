@@ -1,0 +1,6 @@
+datadir: "data/eval_data/hetero"
+num_instances: 100
+
+defaults:
+  - _self_
+  - instance: hetero

@@ -1,0 +1,6 @@
+datadir: "data/eval_data/many_obs"
+num_instances: 100
+
+defaults:
+  - _self_
+  - instance: many_obs
