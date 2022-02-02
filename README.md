@@ -8,7 +8,7 @@ JAXMAPP is a JAX-based library for multi-agent path planning (MAPP) in continuou
 - Construct roadmaps and perform prioritized planning to solve MAPP
 - Develop and evaluate your own roadmap construction methods 
 
-Main contributors: Ryo Yonetani (@yoetaniryo), Keisuke Okumura (@Kei18)
+Main contributors: Ryo Yonetani ([@yonetaniryo](https://github.com/yonetaniryo)), Keisuke Okumura ([@Kei18](https://github.com/Kei18))
 
 ## Installation
 
@@ -42,15 +42,24 @@ and update JAX modules in the container...
 ```
 
 ## Tutorials
-- [1. Quickstart: Create MAPP problems and solve them using default roadmap construction methods](https://gitlab.com/sinicx/perception/on_going/jaxmapp/-/blob/main/tutorials/1.%20Quickstart.ipynb)
-- [2. Develop roadmap construction methods](https://gitlab.com/sinicx/perception/on_going/jaxmapp/-/blob/main/tutorials/2.%20Develop%20roadmap%20construction%20methods.ipynb)
-- [3. Benchmarking roadmap construction methods](https://gitlab.com/sinicx/perception/on_going/jaxmapp/-/blob/main/tutorials/3.%20Benchmarking%20roadmap%20construction%20methods.ipynb)
-- [4. Training sampler](https://gitlab.com/sinicx/perception/on_going/jaxmapp/-/blob/main/tutorials/4.%20Training%20sampler.ipynb)
+- [1. Quickstart: Create MAPP problems and solve them using default roadmap construction methods](https://github.com/omron-sinicx/jaxmapp/blob/main/tutorials/1.%20Quickstart.ipynb)
+- [2. Develop roadmap construction methods](https://github.com/omron-sinicx/jaxmapp/blob/main/tutorials/2.%20Develop%20roadmap%20construction%20methods.ipynb)
+- [3. Benchmarking roadmap construction methods](https://github.com/omron-sinicx/jaxmapp/blob/main/tutorials/3.%20Benchmarking%20roadmap%20construction%20methods.ipynb)
+- [4. Training sampler](https://github.com/omron-sinicx/jaxmapp/blob/main/tutorials/4.%20Training%20sampler.ipynb)
 
 
 ## Citation
 
 ```
+@misc{jaxmapp_2022,
+author = {Yonetani, Ryo and Okumura, Keisuke},
+month = {2},
+title = {JAXMAPP},
+url = {https://github.com/omron-sinicx/jaxmapp},
+year = {2022}
+}
+
+
 @inproceedings{okumura2022ctrm,
 title={CTRMs: Learning to Construct Cooperative Timed Roadmaps for Multi-agent Path Planning in Continuous Spaces},
 author={Okumura, Keisuke and Yonetani, Ryo and Nishimura, Mai and Kanezaki, Asako},
