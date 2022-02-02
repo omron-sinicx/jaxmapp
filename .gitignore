@@ -1,0 +1,14 @@
+**/__pycache__/*.pyc
+.venv
+*.egg-info/
+data/
+log/
+outputs/
+*.npy
+.vscode/settings.json
+**/build
+**/dist
+**/*.c
+**/**.so
+docs/_build
+tutorials/.ipynb_checkpoints/*

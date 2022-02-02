@@ -1,0 +1,16 @@
+seed: 46
+rootdir: 
+
+batch_size: 50
+num_epochs: 1500 
+learning_rate: 0.001
+kl_weight: 1.
+ind_weight: 1.
+modeldir: "data/model/${now:%Y-%m-%d_%H-%M-%S}"
+
+defaults:
+  - _self_
+  - dataset: training_hetero
+  - model: ctrm
+  - sampler: ctrm
+  - planner: 

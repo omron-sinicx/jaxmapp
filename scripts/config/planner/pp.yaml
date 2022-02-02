@@ -1,0 +1,3 @@
+_target_: jaxmapp.planner.prioritized_planning.PrioritizedPlanning
+time_limit: 6000
+verbose: 0

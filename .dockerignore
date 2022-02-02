@@ -1,0 +1,10 @@
+.git/
+.venv/
+data/
+log/
+outputs/
+**/.egg-info/
+**/*cache*
+**/.DS_Store
+**/.gitignore
+**/build/

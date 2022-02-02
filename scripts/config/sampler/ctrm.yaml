@@ -1,0 +1,12 @@
+_target_: jaxmapp.roadmap.learned_sampler.CTRMSampler
+
+inference_fn: 
+params: 
+num_samples: 50
+num_learned_samples: 5
+max_T: 64
+prob_rw_decay_high: 25.0
+prob_rw_decay_low: 5.0
+prob_rw_after_goal: 0.9
+num_rw_attempts: 3 
+max_speed_discount: 0.99
