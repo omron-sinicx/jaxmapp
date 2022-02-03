@@ -14,6 +14,7 @@ from glob import glob
 from typing import Optional
 
 import matplotlib
+import seaborn as sn
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
@@ -207,43 +208,87 @@ def visualize_evaluation_results(
     Returns:
         tuple[list[float], list[float], list[float], list[float]]: success_rate, elapsed_trms, elapsed_planner, and cost
     """
-    name = []
+    methods = []
+    num_samples = []
+    num_expanded = []
     solved = []
     success_rate = []
     elapsed_trms = []
     elapsed_planner = []
     cost = []
     for filename in sorted(glob(f"{dirname}/*Sampler.pkl")):
-        res = pickle.load(open(filename, "rb"))[1]
-        name.append(re.split("_", re.split("/", filename)[-1][:-4])[-1])
+        data = pickle.load(open(filename, "rb"))
+        config = data[0]
+        res = data[1]
+        methods.append(re.split("\.", config.sampler._target_)[-1])
+        num_samples.append(config.sampler.num_samples)
+        cost.append((res[:, 4].astype(float) / res[:, 1].astype(int)))
+        num_expanded.append(res[:, 5].astype(float) / res[:, 1].astype(int))
         solved.append(res[:, 2].astype(bool))
         success_rate.append(res[:, 2].astype(float).mean())
-        elapsed_trms.append(res[:, -2].astype(float))
-        elapsed_planner.append(res[:, -1].astype(float))
-        cost.append((res[:, -3].astype(float) / res[:, 1].astype(int)))
+        elapsed_trms.append(res[:, 6].astype(float))
+        elapsed_planner.append(res[:, 7].astype(float))
 
-    if is_global:
-        all_solved = np.all(np.vstack(solved), axis=0)
-        elapsed_trms = [e[all_solved].mean() for e in elapsed_trms]
-        elapsed_planner = [e[all_solved].mean() for e in elapsed_planner]
-        cost = [e[all_solved].mean() for e in cost]
-    else:
-        elapsed_trms = [e[s].mean() for e, s in zip(elapsed_trms, solved)]
-        elapsed_planner = [e[s].mean() for e, s in zip(elapsed_planner, solved)]
-        cost = [e[s].mean() for e, s in zip(cost, solved)]
+    all_solved = np.all(np.vstack(solved), axis=0)
+    num_expanded = [n[all_solved] for n in num_expanded]
+    cost = [e[all_solved] for e in cost]
+    elapsed_trms = np.array([e[all_solved].mean() for e in elapsed_trms])
+    elapsed_planner = np.array([e[all_solved].mean() for e in elapsed_planner])
+
+    methods = np.array(methods)
+    method_list = np.unique(methods)
+    num_samples = np.array(num_samples)
+    success_rate = np.array(success_rate)
+    cost = np.array(cost)
 
     _, axes = plt.subplots(1, 3, figsize=figsize)
-    x = range(len(name))
-    axes[0].bar(x, success_rate)
+    counter = 0
+    for i, method in enumerate(method_list):
+        ns = num_samples[methods == method]
+        sr = success_rate[methods == method]
+        et = elapsed_trms[methods == method]
+        ep = elapsed_planner[methods == method]
+        axes[0].plot(ns, sr, "o-", label=method)
+
+        ne = [num_expanded[i] for i in range(len(methods)) if methods[i] == method]
+        c = [cost[i] for i in range(len(methods)) if methods[i] == method]
+        for ne_, c_ in zip(ne, c):
+            sn.kdeplot(
+                x=ne_,
+                y=c_,
+                ax=axes[1],
+                alpha=0.5,
+                shade=False,
+                levels=5,
+                thresh=0.3,
+                color=COLORS[i],
+            )
+            axes[1].scatter(ne_, c_, 5, COLORS[i], label=method)
+        axes[2].bar(
+            np.arange(len(ns)) + counter,
+            et,
+            label="Roadmap" if i == 0 else None,
+            color=COLORS[0],
+        )
+        axes[2].bar(
+            np.arange(len(ns)) + counter,
+            ep,
+            bottom=et,
+            label="Planner" if i == 0 else None,
+            color=COLORS[1],
+        )
+        counter += len(ns)
+
+    axes[0].set_ylim([0, 1])
+    axes[0].set_xscale("log")
     axes[0].set_title("Success rate")
-    axes[0].set_xticks(x, name, rotation=30)
-    axes[1].bar(x, cost)
-    axes[1].set_xticks(x, name, rotation=30)
+    axes[0].legend()
+    axes[1].set_ylim([0, 30])
+    axes[1].set_xscale("log")
     axes[1].set_title("Sum-of-costs (normalized)")
-    axes[2].bar(x, elapsed_trms, label="Roadmap")
-    axes[2].bar(x, elapsed_planner, bottom=elapsed_trms, label="Planning")
+    axes[1].legend()
+    axes[2].set_xticks(range(len(methods)), methods, rotation=30)
     axes[2].set_title("Runtime (sec)")
-    axes[2].set_xticks(x, name, rotation=30)
-    plt.legend()
+    axes[2].legend()
 
     return success_rate, elapsed_trms, elapsed_planner, cost

@@ -84,6 +84,7 @@ def main(config):
                 int(res.solved),
                 res.maximum_costs,
                 res.sum_of_costs,
+                res.lowlevel_expanded,
                 toc_trms,
                 toc_planner,
             ]
