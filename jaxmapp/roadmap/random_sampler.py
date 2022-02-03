@@ -13,7 +13,6 @@ from chex import dataclass
 
 from ..utils import sample_random_pos
 from .sampler import DefaultSampler
-from .utils import compute_linear_move_matrix
 
 
 @dataclass
@@ -35,21 +34,3 @@ class RandomSampler(DefaultSampler):
                 )(keys, num_samples, instance.rads, instance.obs.sdf)
 
             return vmapped_fn
-
-    def build_check_connectivity(self):
-        if self.share_roadmap:
-            return lambda vertices, instance: jax.jit(compute_linear_move_matrix)(
-                vertices,
-                instance.max_speeds[0],
-                instance.rads[0],
-                instance.obs.sdf,
-            )
-        else:
-            return lambda vertices, instance: jax.jit(
-                jax.vmap(compute_linear_move_matrix, in_axes=(0, 0, 0, None))
-            )(
-                vertices,
-                instance.max_speeds,
-                instance.rads,
-                instance.obs.sdf,
-            )

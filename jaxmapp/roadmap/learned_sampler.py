@@ -103,49 +103,6 @@ class CTRMSampler(DefaultSampler):
 
         return sample_vertices
 
-    def build_check_connectivity(self):
-        def check_connectivity(vertices: Array, instance: Instance) -> Array:
-            def _check_connectivity(vertices_i, agent_id, max_speed, rad, sdf):
-                def inner_loop_body(t, inner_loop_carry):
-                    pos_carry_i, instance, i, connectivities = inner_loop_carry
-                    pos1 = pos_carry_i[t - 1]
-                    pos2 = pos_carry_i[t]
-                    connectivity = jax.vmap(
-                        jax.vmap(
-                            valid_linear_move, in_axes=(None, 0, None, None, None)
-                        ),
-                        in_axes=(0, None, None, None, None),
-                    )(
-                        pos1,
-                        pos2,
-                        max_speed,
-                        rad,
-                        sdf,
-                    )
-                    connectivities = connectivities.at[t - 1].set(connectivity)
-                    inner_loop_carry = [pos_carry_i, instance, i, connectivities]
-                    return inner_loop_carry
-
-                max_T, num_samples = vertices_i.shape[:2]
-                edges = jnp.zeros((max_T, num_samples, num_samples))
-                loop_carry = [vertices_i, instance, agent_id, edges]
-                loop_carry = jax.lax.fori_loop(
-                    1, self.max_T + 1, inner_loop_body, loop_carry
-                )
-                edges = loop_carry[-1]
-
-                return edges
-
-            return jax.vmap(jax.jit(_check_connectivity), in_axes=(0, 0, 0, 0, None))(
-                vertices,
-                jnp.arange(instance.num_agents),
-                instance.max_speeds,
-                instance.rads,
-                instance.obs.sdf,
-            )
-
-        return check_connectivity
-
     def set_model_and_params(
         self, model: CTRMNet, params: dict, num_neighbors: Optional[int] = None
     ):

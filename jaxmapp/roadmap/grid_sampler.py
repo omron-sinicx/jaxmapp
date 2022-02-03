@@ -47,30 +47,6 @@ def generate_grid(grid_size: int, rad: Array, sdf: Array) -> tuple[Array, Array]
     return pos, validity
 
 
-def connect_four_neighbors(
-    vertices: Array, max_speed: float, rad: float, sdf: Array
-) -> Array:
-    """
-    Obtain four-neighbor edges for grids
-
-    Args:
-        vertices (Array): grid vertices
-        max_speed (float): agent's max speed
-        rad (float): agent's radius
-        sdf (Array): signed distance function of the map
-
-    Returns:
-        Array: edge matrix
-    """
-    max_speed_four_neighbors = (
-        jnp.linalg.norm(vertices[1:] - vertices[0], axis=1).min() * 1.01
-    )
-    max_speed = max_speed_four_neighbors
-    edges = compute_linear_move_matrix(vertices, max_speed, rad, sdf)
-
-    return edges
-
-
 @dataclass
 class GridSampler(DefaultSampler):
     """Grid sampler"""
@@ -102,7 +78,7 @@ class GridSampler(DefaultSampler):
 
     def build_check_connectivity(self):
         if self.share_roadmap:
-            return lambda vertices, instance: jax.jit(connect_four_neighbors)(
+            return lambda vertices, instance: jax.jit(compute_linear_move_matrix)(
                 vertices,
                 instance.max_speeds[0],
                 instance.rads[0],
@@ -110,7 +86,7 @@ class GridSampler(DefaultSampler):
             )
         else:
             return lambda vertices, instance: jax.jit(
-                jax.vmap(connect_four_neighbors, in_axes=(0, 0, 0, None))
+                jax.vmap(compute_linear_move_matrix, in_axes=(0, 0, 0, None))
             )(
                 vertices,
                 instance.max_speeds,

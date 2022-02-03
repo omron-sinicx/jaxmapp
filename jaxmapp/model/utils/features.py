@@ -27,7 +27,7 @@ def get_normed_vec_mag(arr_vec: Array) -> Array:
     Returns:
          Array: normalized vector (3D)
     """
-    vec_mag = jnp.sqrt(jnp.sum(arr_vec ** 2, axis=1)).reshape(-1, 1)
+    vec_mag = jnp.sqrt(jnp.sum(arr_vec**2, axis=1)).reshape(-1, 1)
     vec_mag_avoid_zero = jnp.where(vec_mag == 0, 1, vec_mag)
     arr_vec = arr_vec / vec_mag_avoid_zero
     return jnp.hstack((arr_vec, vec_mag))

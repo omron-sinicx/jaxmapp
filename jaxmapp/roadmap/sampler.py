@@ -11,11 +11,14 @@ from __future__ import annotations
 import time
 from logging import getLogger
 
+import jax
+import jax.numpy as jnp
 import numpy as np
 from chex import Array, PRNGKey, dataclass
 
 from ..env.instance import Instance
 from .timed_roadmap import TimedRoadmap
+from .utils import compute_linear_move_matrix, valid_linear_move
 
 logger = getLogger(__name__)
 
@@ -83,20 +86,78 @@ class DefaultSampler:
 
         """
 
-        def check_connectivity(vertices: Array, instance: Instance) -> Array:
-            """
-            Compute edges between vertices
+        if self.timed_roadmap:
 
-            Args:
-                vertices (Array): a list of vertices
-                instance (Instance): problem instance
+            def check_connectivity(vertices: Array, instance: Instance) -> Array:
+                def _check_connectivity(vertices_i, agent_id, max_speed, rad, sdf):
+                    def inner_loop_body(t, inner_loop_carry):
+                        pos_carry_i, instance, i, connectivities = inner_loop_carry
+                        pos1 = pos_carry_i[t - 1]
+                        pos2 = pos_carry_i[t]
+                        connectivity = jax.vmap(
+                            jax.vmap(
+                                valid_linear_move, in_axes=(None, 0, None, None, None)
+                            ),
+                            in_axes=(0, None, None, None, None),
+                        )(
+                            pos1,
+                            pos2,
+                            max_speed,
+                            rad,
+                            sdf,
+                        )
+                        connectivities = connectivities.at[t - 1].set(connectivity)
+                        inner_loop_carry = [pos_carry_i, instance, i, connectivities]
+                        return inner_loop_carry
 
-            Returns:
-                Array: edge matrices stacked over agents
-            """
-            raise NotImplementedError()
+                    max_T, num_samples = vertices_i.shape[:2]
+                    edges = jnp.zeros((max_T, num_samples, num_samples))
+                    loop_carry = [vertices_i, instance, agent_id, edges]
+                    loop_carry = jax.lax.fori_loop(
+                        1, self.max_T + 1, inner_loop_body, loop_carry
+                    )
+                    edges = loop_carry[-1]
 
-        return check_connectivity
+                    return edges
+
+                return jax.vmap(
+                    jax.jit(_check_connectivity), in_axes=(0, 0, 0, 0, None)
+                )(
+                    vertices,
+                    jnp.arange(instance.num_agents),
+                    instance.max_speeds,
+                    instance.rads,
+                    instance.obs.sdf,
+                )
+
+            return check_connectivity
+
+        else:
+
+            if self.share_roadmap:
+
+                def check_connectivity(vertices, instance):
+                    return compute_linear_move_matrix(
+                        vertices,
+                        instance.max_speeds[0],
+                        instance.rads[0],
+                        instance.obs.sdf,
+                    )
+
+                return jax.jit(check_connectivity)
+            else:
+
+                def check_connectivity(vertices, instance):
+                    return jax.vmap(
+                        compute_linear_move_matrix, in_axes=(0, 0, 0, None)
+                    )(
+                        vertices,
+                        instance.max_speeds,
+                        instance.rads,
+                        instance.obs.sdf,
+                    )
+
+                return jax.jit(check_connectivity)
 
     def build_construct_trms(self):
         """
