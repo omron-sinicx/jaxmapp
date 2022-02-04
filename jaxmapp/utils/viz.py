@@ -228,6 +228,7 @@ def visualize_evaluation_results(
         success_rate.append(res[:, 2].astype(float).mean())
         elapsed_trms.append(res[:, 6].astype(float))
         elapsed_planner.append(res[:, 7].astype(float))
+    print(num_samples)
 
     all_solved = np.all(np.vstack(solved), axis=0)
     num_expanded = [n[all_solved] for n in num_expanded]
@@ -263,31 +264,37 @@ def visualize_evaluation_results(
                 thresh=0.3,
                 color=COLORS[i],
             )
-            axes[1].scatter(ne_, c_, 5, COLORS[i], label=method)
+        axes[1].plot(
+            np.array(ne).mean(axis=1),
+            np.array(c).mean(axis=1),
+            "o-",
+            color=COLORS[i],
+            label=method,
+        )
         axes[2].bar(
             np.arange(len(ns)) + counter,
             et,
             label="Roadmap" if i == 0 else None,
-            color=COLORS[0],
+            color="#333366",
         )
         axes[2].bar(
             np.arange(len(ns)) + counter,
             ep,
             bottom=et,
             label="Planner" if i == 0 else None,
-            color=COLORS[1],
+            color="#9999bb",
         )
         counter += len(ns)
 
     axes[0].set_ylim([0, 1])
-    axes[0].set_xscale("log")
     axes[0].set_title("Success rate")
     axes[0].legend()
     axes[1].set_ylim([0, 30])
     axes[1].set_xscale("log")
     axes[1].set_title("Sum-of-costs (normalized)")
     axes[1].legend()
-    axes[2].set_xticks(range(len(methods)), methods, rotation=30)
+    runtime_labels = [f"{m}_{n}" for m, n in zip(methods, num_samples)]
+    axes[2].set_xticks(range(len(runtime_labels)), runtime_labels, rotation=90)
     axes[2].set_title("Runtime (sec)")
     axes[2].legend()
 
