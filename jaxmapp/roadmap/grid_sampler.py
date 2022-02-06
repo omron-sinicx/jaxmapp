@@ -71,25 +71,6 @@ class GridSampler(DefaultSampler):
                 pos, validity = jax.vmap(generate_grid, in_axes=(None, 0, None))(
                     grid_size, instance.rads, instance.obs.sdf
                 )
-                pos = jnp.array([p[v] for p, v in zip(pos, validity)])
                 return pos
 
             return vmapped_sample_fn
-
-    def build_check_connectivity(self):
-        if self.share_roadmap:
-            return lambda vertices, instance: jax.jit(compute_linear_move_matrix)(
-                vertices,
-                instance.max_speeds[0],
-                instance.rads[0],
-                instance.obs.sdf,
-            )
-        else:
-            return lambda vertices, instance: jax.jit(
-                jax.vmap(compute_linear_move_matrix, in_axes=(0, 0, 0, None))
-            )(
-                vertices,
-                instance.max_speeds,
-                instance.rads,
-                instance.obs.sdf,
-            )
