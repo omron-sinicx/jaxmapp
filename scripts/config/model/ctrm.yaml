@@ -1,0 +1,17 @@
+_target_: jaxmapp.model.ctrmnet.CTRMNet
+
+# common
+dim_hidden: 32
+
+# preprocessor
+fov_size: 19
+num_neighbors: 5
+dim_attention: 10
+dim_message: 32
+dim_output_fov: 32
+
+# CVAE
+dim_latent: 64
+dim_output: 3
+dim_indicator: 3
+temp: 2.0

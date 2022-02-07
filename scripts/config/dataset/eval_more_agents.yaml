@@ -1,0 +1,6 @@
+datadir: "data/eval_data/more_agents"
+num_instances: 100
+
+defaults:
+  - _self_
+  - instance: more_agents

@@ -1,0 +1,9 @@
+seed: 46
+rootdir: 
+
+defaults:
+  - _self_
+  - dataset: eval_example
+  - model: 
+  - sampler: 
+  - planner: 

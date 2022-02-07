@@ -1,0 +1,13 @@
+seed: 46
+rootdir: 
+
+modeldir: "model/training_hetero_k05/"
+savefile_prefix:  "${dataset.datadir}/${now:%Y-%m-%d_%H-%M-%S}"
+dryrun: true
+
+defaults:
+  - _self_
+  - dataset: eval_example
+  - model: ctrm
+  - sampler: ctrm
+  - planner: pp

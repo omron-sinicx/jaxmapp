@@ -1,0 +1,5 @@
+_target_: jaxmapp.roadmap.grid_sampler.GridSampler
+
+share_roadmap: false
+num_samples: 1200
+max_T: 64

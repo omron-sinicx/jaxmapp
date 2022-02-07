@@ -1,0 +1,24 @@
+version: "2.4"
+
+services:
+  dev: &dev
+    build: .
+    image: omron_sinicx/jaxmapp
+    container_name: ${USER}.jaxmapp
+    volumes:
+      - ${PWD}:/workspace
+    tty: true
+    stdin_open: true
+    ports:
+      - 8888:8888
+      - 6006:6006
+
+  # should do pip install "jax[cuda]==0.2.25" -f https://storage.googleapis.com/jax-releases/jax_releases.html  # Note: wheels only available on linux.
+  dev-gpu:
+    <<: *dev
+    runtime: nvidia
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - TF_FORCE_GPU_ALLOW_GROWTH=true
+    volumes:
+      - $PWD:/workspace

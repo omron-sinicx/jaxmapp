@@ -1,0 +1,9 @@
+datadir: "data/training_data"
+num_instances:
+  train: 1000
+  val: 100
+  test: 100
+
+defaults:
+  - _self_
+  - instance: hetero_fixednumagents

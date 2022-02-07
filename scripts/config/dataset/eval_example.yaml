@@ -1,0 +1,6 @@
+datadir: "data_example/eval_data/example"
+num_instances: 10
+
+defaults:
+  - _self_
+  - instance: standard
