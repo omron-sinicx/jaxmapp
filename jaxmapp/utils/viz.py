@@ -194,17 +194,16 @@ def plot_trms(
     ax.xaxis.tick_top()
 
 
-def visualize_evaluation_results(dirname: str, figsize=[12, 3]) -> None:
+def visualize_evaluation_results(
+    dirname: str, abbrev: bool = False, figsize: tuple[int, int] = [12, 3]
+) -> None:
     """
-    Visualize multiple benchmark results
+    Visualize benchmark experiment results
 
     Args:
-        dirname (str): directory containing reults with ***Sampler.pkl
-        is_global (bool, optional): If runtime and cost metrics are computed for instances solved by all methods. Defaults to True.
-        figsize (list, optional): figure size. Defaults to [12, 3].
-
-    Returns:
-        tuple[list[float], list[float], list[float], list[float]]: success_rate, elapsed_trms, elapsed_planner, and cost
+        dirname (str): dataset directory that contains *Sampler.pkl
+        abbrev (bool, optional): if the sampler name is abbreviated in the xtick. Defaults to False.
+        figsize (tuple[int, int], optional): figure size. Defaults to [12, 3].
     """
     methods = []
     num_samples = []
@@ -285,12 +284,18 @@ def visualize_evaluation_results(dirname: str, figsize=[12, 3]) -> None:
 
     axes[0].set_ylim([0, 1.1])
     axes[0].set_title("Success rate")
+    axes[0].set_xlabel("num_samples per agent & timestep")
+    axes[0].set_ylabel("Success rate")
     axes[0].legend()
     axes[1].set_ylim([0, 30])
     axes[1].set_xscale("log")
-    axes[1].set_title("Sum-of-costs (normalized)")
+    axes[1].set_title("Sum-of-costs")
+    axes[1].set_xlabel("expanded vertices / num_agents")
+    axes[1].set_ylabel("Sum-of-costs / agents")
     axes[1].legend()
-    runtime_labels = sorted([f"{m}_{n:04d}" for m, n in zip(methods, num_samples)])
+    runtime_labels = sorted(
+        [f"{m[0] if abbrev else m}_{n:04d}" for m, n in zip(methods, num_samples)]
+    )
     axes[2].set_xticks(range(len(runtime_labels)), runtime_labels, rotation=90)
     axes[2].set_title("Runtime (sec)")
     axes[2].legend()
