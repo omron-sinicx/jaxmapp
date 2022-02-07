@@ -1,4 +1,4 @@
-# JAXMAPP
+# JAXMAPP: JAX-based Library for Multi-Agent Path Planning in Continuous Spaces
 ![gallery](assets/gallery.png) 
 ![roadmap](assets/roadmap.png)
 ![metrics](assets/benchmark.png)
@@ -12,7 +12,7 @@ Main contributors: Ryo Yonetani ([@yonetaniryo](https://github.com/yonetaniryo))
 
 ## Installation
 
-The code has been tested on Ubuntu 16.04 and 18.04, as well as WSL2 (Ubuntu 20.04) on Windows 11. We recommend using docker to replicate our setup. Planning can be performed only on the CPU, and the use of GPUs is also supported for training/evaluating machine-learning models.
+The code has been tested on Ubuntu 16.04 and 18.04, as well as WSL2 (Ubuntu 20.04) on Windows 11. Planning can be performed only on the CPU, and the use of GPUs is also supported for training/evaluating machine-learning models. We also provide Dockerfile to replicate our setup. 
 
 ### venv 
 
@@ -54,7 +54,7 @@ and update JAX modules in the container...
 @misc{jaxmapp_2022,
 author = {Yonetani, Ryo and Okumura, Keisuke},
 month = {2},
-title = {JAXMAPP},
+title = {JAXMAPP: JAX-based Library for Multi-Agent Path Planning in Continuous Spaces},
 url = {https://github.com/omron-sinicx/jaxmapp},
 year = {2022}
 }
