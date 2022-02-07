@@ -286,14 +286,14 @@ def visualize_evaluation_results(
         )
         counter += len(ns)
 
-    axes[0].set_ylim([0, 1])
+    axes[0].set_ylim([0, 1.1])
     axes[0].set_title("Success rate")
     axes[0].legend()
     axes[1].set_ylim([0, 30])
     axes[1].set_xscale("log")
     axes[1].set_title("Sum-of-costs (normalized)")
     axes[1].legend()
-    runtime_labels = [f"{m}_{n}" for m, n in zip(methods, num_samples)]
+    runtime_labels = sorted([f"{m}_{n:04d}" for m, n in zip(methods, num_samples)])
     axes[2].set_xticks(range(len(runtime_labels)), runtime_labels, rotation=90)
     axes[2].set_title("Runtime (sec)")
     axes[2].legend()
