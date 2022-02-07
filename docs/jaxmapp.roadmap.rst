@@ -4,53 +4,15 @@ jaxmapp.roadmap package
 Submodules
 ----------
 
-jaxmapp.roadmap.grid\_sampler module
-------------------------------------
+.. toctree::
+   :maxdepth: 4
 
-.. automodule:: jaxmapp.roadmap.grid_sampler
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-jaxmapp.roadmap.learned\_sampler module
----------------------------------------
-
-.. automodule:: jaxmapp.roadmap.learned_sampler
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-jaxmapp.roadmap.random\_sampler module
---------------------------------------
-
-.. automodule:: jaxmapp.roadmap.random_sampler
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-jaxmapp.roadmap.sampler module
-------------------------------
-
-.. automodule:: jaxmapp.roadmap.sampler
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-jaxmapp.roadmap.timed\_roadmap module
--------------------------------------
-
-.. automodule:: jaxmapp.roadmap.timed_roadmap
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-jaxmapp.roadmap.utils module
-----------------------------
-
-.. automodule:: jaxmapp.roadmap.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   jaxmapp.roadmap.grid_sampler
+   jaxmapp.roadmap.learned_sampler
+   jaxmapp.roadmap.random_sampler
+   jaxmapp.roadmap.sampler
+   jaxmapp.roadmap.timed_roadmap
+   jaxmapp.roadmap.utils
 
 Module contents
 ---------------

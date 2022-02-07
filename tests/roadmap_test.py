@@ -69,9 +69,7 @@ def test_learned_sampler(setup):
 
     sampler = CTRMSampler()
     model = hydra.utils.instantiate(OmegaConf.load("scripts/config/model/ctrm.yaml"))
-    params = restore_checkpoint("data_example/model/training_hetero_k05/", None)[
-        "params"
-    ]
+    params = restore_checkpoint("model/training_hetero_k05/", None)["params"]
     sampler.set_model_and_params(model, params)
     vertices = sampler.sample_vertices(key, 25, ins)
     assert vertices.shape == (ins.num_agents, sampler.max_T, 25, 2)

@@ -14,10 +14,10 @@ from glob import glob
 from typing import Optional
 
 import matplotlib
-import seaborn as sn
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sn
 from jaxmapp.roadmap.timed_roadmap import TimedRoadmap
 
 from ..env.instance import Instance
@@ -194,9 +194,7 @@ def plot_trms(
     ax.xaxis.tick_top()
 
 
-def visualize_evaluation_results(
-    dirname: str, is_global: bool = True, figsize=[12, 3]
-) -> tuple[list[float], list[float], list[float], list[float]]:
+def visualize_evaluation_results(dirname: str, figsize=[12, 3]) -> None:
     """
     Visualize multiple benchmark results
 
@@ -228,7 +226,6 @@ def visualize_evaluation_results(
         success_rate.append(res[:, 2].astype(float).mean())
         elapsed_trms.append(res[:, 6].astype(float))
         elapsed_planner.append(res[:, 7].astype(float))
-    print(num_samples)
 
     all_solved = np.all(np.vstack(solved), axis=0)
     num_expanded = [n[all_solved] for n in num_expanded]
@@ -297,5 +294,3 @@ def visualize_evaluation_results(
     axes[2].set_xticks(range(len(runtime_labels)), runtime_labels, rotation=90)
     axes[2].set_title("Runtime (sec)")
     axes[2].legend()
-
-    return success_rate, elapsed_trms, elapsed_planner, cost

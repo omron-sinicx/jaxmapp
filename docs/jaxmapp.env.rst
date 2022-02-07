@@ -4,21 +4,11 @@ jaxmapp.env package
 Submodules
 ----------
 
-jaxmapp.env.instance module
----------------------------
+.. toctree::
+   :maxdepth: 4
 
-.. automodule:: jaxmapp.env.instance
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-jaxmapp.env.obstacle module
----------------------------
-
-.. automodule:: jaxmapp.env.obstacle
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   jaxmapp.env.instance
+   jaxmapp.env.obstacle
 
 Module contents
 ---------------

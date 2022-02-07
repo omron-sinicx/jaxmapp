@@ -4,29 +4,12 @@ jaxmapp.utils package
 Submodules
 ----------
 
-jaxmapp.utils.data module
--------------------------
+.. toctree::
+   :maxdepth: 4
 
-.. automodule:: jaxmapp.utils.data
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-jaxmapp.utils.sampler module
-----------------------------
-
-.. automodule:: jaxmapp.utils.sampler
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-jaxmapp.utils.viz module
-------------------------
-
-.. automodule:: jaxmapp.utils.viz
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   jaxmapp.utils.data
+   jaxmapp.utils.sampler
+   jaxmapp.utils.viz
 
 Module contents
 ---------------

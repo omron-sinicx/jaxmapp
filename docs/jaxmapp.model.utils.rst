@@ -4,21 +4,11 @@ jaxmapp.model.utils package
 Submodules
 ----------
 
-jaxmapp.model.utils.encoder module
-----------------------------------
+.. toctree::
+   :maxdepth: 4
 
-.. automodule:: jaxmapp.model.utils.encoder
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-jaxmapp.model.utils.features module
------------------------------------
-
-.. automodule:: jaxmapp.model.utils.features
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   jaxmapp.model.utils.encoder
+   jaxmapp.model.utils.features
 
 Module contents
 ---------------
