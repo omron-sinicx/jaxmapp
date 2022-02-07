@@ -1,7 +1,6 @@
 **/__pycache__/*.pyc
 .venv
 *.egg-info/
-data/
 log/
 outputs/
 *.npy

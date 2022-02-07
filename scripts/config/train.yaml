@@ -6,7 +6,7 @@ num_epochs: 1500
 learning_rate: 0.001
 kl_weight: 1.
 ind_weight: 1.
-modeldir: "data/model/${now:%Y-%m-%d_%H-%M-%S}"
+modeldir: "model/${now:%Y-%m-%d_%H-%M-%S}"
 
 defaults:
   - _self_
