@@ -3,7 +3,6 @@ SHELL=/bin/bash
 .DEFAULT_GOAL := standard
 
 standard:
-	source ~/.bashrc
 	pip install .
 	pip install cython_helper/
 

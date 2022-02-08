@@ -2,8 +2,10 @@ version: "2.4"
 
 services:
   dev: &dev
-    build: .
-    image: omron_sinicx/jaxmapp
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: omron-sinicx/jaxmapp
     container_name: ${USER}.jaxmapp
     volumes:
       - ${PWD}:/workspace
