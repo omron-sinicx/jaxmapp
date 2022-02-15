@@ -2,7 +2,7 @@
 
 for dataset in eval_standard eval_wo_obs eval_many_obs eval_more_agents eval_hetero
 do
-for num_samples in 25 50 75 100
+for num_samples in 50 100 150
 do
 echo "dataset: $dataset | num_samples: $num_samples"
 python scripts/eval.py dataset=$dataset sampler=ctrm sampler.num_samples=$num_samples

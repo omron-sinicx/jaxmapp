@@ -11,3 +11,4 @@ outputs/
 **/*.so
 docs/_build
 tutorials/.ipynb_checkpoints/*
+data/training_data*
