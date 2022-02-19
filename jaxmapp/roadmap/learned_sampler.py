@@ -75,8 +75,8 @@ class CTRMSampler(DefaultSampler):
     inference_fn: Callable = None  # inference function of CTRMNet
     params: dict = None  # parameter dicts for CTRMNet
     num_samples: int = 25  # number of trajectories (paths) to sample
-    num_learned_samples: int = (
-        5  # number of trajectories to sample with high random-walk decay
+    num_rw_samples: int = (
+        15  # number of trajectories to sample with high random-walk decay
     )
     max_T: int = 64  # maximum number of timesteps for each traj
     prob_rw_decay_high: float = (
@@ -167,7 +167,7 @@ class CTRMSampler(DefaultSampler):
                     self.params,
                     self.inference_fn,
                     prob_rw_decay=self.prob_rw_decay_high
-                    if trial_id < self.num_learned_samples
+                    if trial_id > self.num_rw_samples
                     else self.prob_rw_decay_low,
                     prob_rw_after_goal=self.prob_rw_after_goal,
                     num_rw_attempts=self.num_rw_attempts,
