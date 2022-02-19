@@ -293,9 +293,11 @@ def visualize_evaluation_results(
     axes[1].set_xlabel("expanded vertices / num_agents")
     axes[1].set_ylabel("Sum-of-costs / agents")
     axes[1].legend()
-    runtime_labels = sorted(
-        [f"{m[0] if abbrev else m}_{n:04d}" for m, n in zip(methods, num_samples)]
-    )
+    runtime_labels = []
+    for i, method in enumerate(method_list):
+        ms = methods[methods == method]
+        ns = num_samples[methods == method]
+        runtime_labels += [f"{m[0] if abbrev else m}_{n:04d}" for m, n in zip(ms, ns)]
     axes[2].set_xticks(range(len(runtime_labels)), runtime_labels, rotation=90)
     axes[2].set_title("Runtime (sec)")
     axes[2].legend()
