@@ -104,17 +104,17 @@ class TimedRoadmap:
         edges = jnp.vstack(
             (jnp.hstack((edges, edges_g.reshape(-1, 1))), jnp.hstack((edges_g, True)))
         )
-        edges = [x.nonzero()[0].tolist() for x in edges]
+        edges = [np.argwhere(x).flatten().tolist() for x in np.array(edges)]
+
+        self.E[0][0] = np.argwhere(np.array(edges_s)).flatten().tolist()
 
         vertices = jnp.vstack((vertices, goal))
-
-        self.E[0][0] = np.array(edges_s.nonzero()[0]).tolist()
+        vertices = np.array(vertices, np.float64)
 
         self.extend_layer(max_T)
         for t in range(1, max_T + 1):
             self.V[t] = [
-                TimedVertex(t=t, index=i, pos=np.array(p, np.float64))
-                for i, p in enumerate(vertices)
+                TimedVertex(t=t, index=i, pos=p) for i, p in enumerate(vertices)
             ]
             self.E[t] = edges
         self.E[max_T] = [[] for _ in range(len(vertices))]
@@ -153,7 +153,7 @@ class TimedRoadmap:
             rad,
             sdf,
         )
-        self.E[0][0] = np.array(edges_s.nonzero()[0]).tolist()
+        self.E[0][0] = np.argwhere(np.array(edges_s)).flatten().tolist()
 
         for t in range(1, max_T + 1):
             vertices_t = vertices[t - 1]
@@ -173,13 +173,12 @@ class TimedRoadmap:
                     jnp.hstack((edges_g_inv, True)),
                 )
             )
-            edges_t = [x.nonzero()[0].tolist() for x in edges_t]
+            edges_t = [np.argwhere(x).flatten().tolist() for x in np.array(edges_t)]
 
-            vertices_t = jnp.vstack((vertices_t, goal))
+            vertices_t = np.array(jnp.vstack((vertices_t, goal)), np.float64)
 
             self.V[t] = [
-                TimedVertex(t=t, index=i, pos=np.array(p, np.float64))
-                for i, p in enumerate(vertices_t)
+                TimedVertex(t=t, index=i, pos=p) for i, p in enumerate(vertices_t)
             ]
             self.E[t] = edges_t
         self.E[max_T] = [[] for _ in range(len(vertices))]
