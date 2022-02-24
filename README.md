@@ -38,7 +38,7 @@ $ docker-compose exec dev-gpu bash
 and update JAX modules in the container...
 
 ```console
-# pip install "jax[cuda]==0.2.25" -f https://storage.googleapis.com/jax-releases/jax_releases.html
+# pip install "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_releases.html
 ```
 
 ## Tutorials
