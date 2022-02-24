@@ -15,7 +15,7 @@ services:
       - 8888:8888
       - 6006:6006
 
-  # should do pip install "jax[cuda]==0.2.25" -f https://storage.googleapis.com/jax-releases/jax_releases.html  # Note: wheels only available on linux.
+  # should do pip install "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_releases.html  # Note: wheels only available on linux.
   dev-gpu:
     <<: *dev
     runtime: nvidia
