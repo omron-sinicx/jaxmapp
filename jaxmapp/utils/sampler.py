@@ -135,5 +135,6 @@ def _sample_random_pos(
     pos = jax.lax.cond(
         num_trials < num_max_trials, lambda _: pos, lambda _: pos * jnp.inf, None
     )
-    carried_pos = jax.ops.index_update(carried_pos, i, pos)  # update pos
+    carried_pos = carried_pos.at[i].set(pos)
+
     return [key, carried_pos, rads, sdf]
