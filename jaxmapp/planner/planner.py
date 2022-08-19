@@ -17,7 +17,7 @@ from typing import Optional
 
 import numpy as np
 import timeout_decorator
-from check_continuous_collision import check_continuous_collision
+from jaxmapp.check_continuous_collision import check_continuous_collision
 
 from ..env import Instance
 from ..roadmap import TimedRoadmap, TimedVertex

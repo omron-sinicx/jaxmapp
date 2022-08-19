@@ -8,7 +8,7 @@ JAXMAPP is a JAX-based library for multi-agent path planning (MAPP) in continuou
 - Construct roadmaps and perform prioritized planning to solve MAPP
 - Develop and evaluate your own roadmap construction methods 
 
-Main contributors: Ryo Yonetani ([@yonetaniryo](https://github.com/yonetaniryo)), Keisuke Okumura ([@Kei18](https://github.com/Kei18))
+Main contributors: Ryo Yonetani ([@yonetaniryo](https://github.com/yonetaniryo)), Keisuke Okumura ([@Kei18](https://github.com/Kei18)), Mai Nishimura ([@denkiwakame](https://github.com/denkiwakame))
 
 ## Installation
 
@@ -19,7 +19,7 @@ The code has been tested on Ubuntu 16.04 and 18.04, as well as WSL2 (Ubuntu 20.0
 ```console
 $ python -m venv .venv
 $ source .venv/bin/activate
-(.venv) $ make
+(.venv) $ pip install -e .[dev]
 ```
 
 ### Docker container

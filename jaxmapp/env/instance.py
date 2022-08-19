@@ -275,14 +275,10 @@ class InstanceGeneratorCircleObs(InstanceGenerator):
         )
 
         circle_obs = jax.random.uniform(key, shape=(self.num_obs, 3))
-        circle_obs = jax.ops.index_mul(
-            circle_obs,
-            jnp.index_exp[:, 2],
-            (self.obs_size_upper_bound - self.obs_size_lower_bound) / 2,
+        circle_obs = circle_obs.at[:, 2].multiply(
+            (self.obs_size_upper_bound - self.obs_size_lower_bound) / 2
         )
-        circle_obs = jax.ops.index_add(
-            circle_obs, jnp.index_exp[:, 2], self.obs_size_lower_bound / 2
-        )
+        circle_obs = circle_obs.at[:, 2].add(self.obs_size_lower_bound / 2)
         circle_obs = [ObstacleSphere(pos=o[:2], rad=o[2]) for o in circle_obs]
         occupancy = np.dstack([x.draw_2d(self.map_size) for x in circle_obs]).max(-1)
         cmap2d = CMap2D()
