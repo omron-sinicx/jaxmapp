@@ -22,12 +22,12 @@ RUN echo 'alias jupyter-lab="/venv/bin/jupyter-lab"' >> ~/.bashrc
 
 
 WORKDIR /tmp
-COPY Makefile .
 COPY setup.py .
 COPY setup.cfg .
+COPY pyproject.toml .
 COPY jaxmapp/ jaxmapp/
 COPY cython_helper/ cython_helper/
-RUN make venv
+RUN /venv/bin/pip install -e .[dev]
 
 WORKDIR /workspace
 
