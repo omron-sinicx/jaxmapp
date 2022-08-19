@@ -13,7 +13,7 @@ RUN rm -rf /var/lib/apt/lists/*
 
 # create virtual environment
 RUN python -m venv /venv
-RUN /venv/bin/pip install -U pip distlib setuptools
+RUN /venv/bin/pip install -U pip distlib setuptools wheel
 
 # and add aliases
 RUN echo 'alias python="/venv/bin/python"' >> ~/.bashrc
@@ -21,7 +21,11 @@ RUN echo 'alias pip="/venv/bin/pip"' >> ~/.bashrc
 RUN echo 'alias jupyter-lab="/venv/bin/jupyter-lab"' >> ~/.bashrc
 
 
+# temporary fix
+ENV SETUPTOOLS_ENABLE_FEATURES="legacy-editable"
+
 WORKDIR /tmp
+COPY README.md .
 COPY setup.py .
 COPY setup.cfg .
 COPY pyproject.toml .
