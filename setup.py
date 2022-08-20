@@ -1,7 +1,6 @@
 from Cython.Distutils import build_ext
 from setuptools import Extension, setup
 
-setup()
 ext_modules = [
     Extension(
         "jaxmapp.check_continuous_collision",
