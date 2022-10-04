@@ -3,8 +3,8 @@ from setuptools import Extension, setup
 
 ext_modules = [
     Extension(
-        "jaxmapp.check_continuous_collision",
-        sources=["cython_helper/check_continuous_collision.pyx"],
+        "jaxmapp.cython_helper.check_continuous_collision",
+        sources=["src/cython_helper/check_continuous_collision.pyx"],
         extra_compile_args=["-O3"],
     )
 ]

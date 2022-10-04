@@ -2,6 +2,61 @@
 requires = ["setuptools", "wheel", "cython"]
 build-backend = 'setuptools.build_meta'
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[project]
+name = "jaxmapp"
+description = "jax library for multi-agent path planning in continuous spaces"
+readme = "README.md"
+authors = [{ name = "Ryo Yonetani" }, { email = "ryo.yonetani@sinicx.com" }]
+license = {file = "LICENSE"}
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Development Status :: 4 - Beta",
+    "Framework :: Robot Framework :: Library",
+    "Framework :: Robot Framework :: Tool"
+]
+requires-python = ">=3.8.*"
+dependencies = [
+    "jax==0.3.16",
+    "jaxlib==0.3.15",
+    "flax==0.6.0",
+    "numpy",
+    "tqdm",
+    "tensorboardx",
+    "jupyterlab",
+    "matplotlib",
+    "seaborn",
+    "scikit-image",
+    "pymap2d",
+    "tqdm",
+    "timeout_decorator",
+    "tensorflow_probability",
+    "hydra-core",
+    "joblib",
+    "numpy2tfrecord",
+    "cython",
+]
+version = "0.0.4"
+
+[project.urls]
+Homepage = "https://github.com/omron-sinicx/jaxmapp"
+repository = "https://github.com/omron-sinicx/jaxmapp"
+
+
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pysen==0.10.1",
+    "black==22.3.0",
+    "flake8==4.0.1",
+    "isort==5.10.1",
+    "mypy==0.910",
+]
+
+
 [tool.pysen]
 version = "0.10.1"
 
