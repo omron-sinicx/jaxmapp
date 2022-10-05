@@ -7,7 +7,7 @@ package-dir = {"" = "src"}
 
 [project]
 name = "jaxmapp"
-description = "jax library for multi-agent path planning in continuous spaces"
+description = "jax-based library for multi-agent path planning in continuous spaces"
 readme = "README.md"
 authors = [{ name = "Ryo Yonetani" }, { email = "ryo.yonetani@sinicx.com" }]
 license = {file = "LICENSE"}

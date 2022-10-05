@@ -24,23 +24,23 @@ from .utils import valid_linear_move
 logger = getLogger(__name__)
 
 
-def load_pretrained_ctrm_sampler(
+def load_learned_sampler(
     model_yaml: str,
     model_dir: str,
     sampler_yaml: str,
     model_args: dict = None,
     sampler_args: dict = None,
-) -> CTRMSampler:
+) -> DefaultSampler:
     """
-    Load pretrained CTRM sampler
+    Load learned sampler
 
     Args:
-        model_yaml (str): Hydra config file for CTRM model
+        model_yaml (str): Hydra config file for model
         model_dir (str): directory storing model checkpoint
-        sampler_yaml (str): Hydra config file for CTRMSampler
+        sampler_yaml (str): Hydra config file for learned sampler
 
     Returns:
-        CTRMSampler: sampler
+        DefaultSampler: sampler
     """
     import hydra
     import omegaconf
@@ -65,7 +65,7 @@ def load_pretrained_ctrm_sampler(
 
 
 @dataclass
-class CTRMSampler(DefaultSampler):
+class DefaultSampler(DefaultSampler):
     """Biased sampler using learned CTRM model"""
 
     share_roadmap: bool = False

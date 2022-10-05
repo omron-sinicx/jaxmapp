@@ -12,7 +12,7 @@ Main contributors: Ryo Yonetani ([@yonetaniryo](https://github.com/yonetaniryo))
 
 ## Installation
 
-The code has been tested on Ubuntu 16.04 and 18.04, as well as WSL2 (Ubuntu 20.04) on Windows 11, with python3 (>=3.8). Planning can be performed only on the CPU, and the use of GPUs is also supported for training/evaluating machine-learning models. We also provide Dockerfile to replicate our setup. 
+The code has been tested on Ubuntu >=16.04 as well as WSL2 (Ubuntu 20.04) on Windows 11, with python3 (>=3.8). Planning can be performed only on the CPU, and the use of GPUs is supported for training/evaluating machine-learning models. We also provide Dockerfile to replicate our setup. 
 
 ### venv 
 
@@ -38,7 +38,7 @@ $ docker-compose exec dev-gpu bash
 and update JAX modules in the container...
 
 ```console
-# pip install "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_releases.html
+# pip install --upgrade "jax[cuda]==0.3.16" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 ```
 
 ## Tutorials
