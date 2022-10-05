@@ -18,7 +18,6 @@ import jax.numpy as jnp
 import optax
 from flax.training.checkpoints import save_checkpoint
 from flax.training.train_state import TrainState
-from jaxmapp.utils.data import check_rootdir
 from numpy2tfrecord import build_dataset_from_tfrecord
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
@@ -68,18 +67,14 @@ def step(key, batch, state, kl_weight, ind_weight, is_training=True):
 @hydra.main(config_path="config", config_name="train")
 def main(config):
     logger = getLogger(__name__)
-    config.rootdir = check_rootdir(config.rootdir)
     logger.info(f"random seed: {config.seed}")
     map_size = config.dataset.instance.map_size
     logger.info(f"map size: {map_size}")
 
     datasets = dict()
     for split in ["train", "val"]:
-        filename = (
-            f"{config.rootdir}/{config.dataset.datadir}/{split}_{map_size:05d}.tfrec"
-        )
+        filename = f"{config.dataset.datadir}/{split}_{map_size:05d}.tfrec"
         dataset = build_dataset_from_tfrecord(filename)
-        # parsed_dataset = raw_dataset.map(parse_tfrecord).map(prepare_sample)
         dataset = (
             dataset.shuffle(config.batch_size * 100, seed=config.seed)
             .batch(config.batch_size)
@@ -87,8 +82,8 @@ def main(config):
         )
         datasets[split] = dataset
 
-    writer = SummaryWriter(log_dir=f"{config.rootdir}/{config.modeldir}/tb")
-    pickle.dump(config, open(f"{config.rootdir}/{config.modeldir}/tb/config.pkl", "wb"))
+    writer = SummaryWriter(log_dir=f"{config.modeldir}/tb")
+    pickle.dump(config, open(f"{config.modeldir}/tb/config.pkl", "wb"))
 
     key = jax.random.PRNGKey(config.seed)
     model = hydra.utils.instantiate(config.model)
@@ -150,7 +145,7 @@ def main(config):
         )
         if losses["val"] < val_loss_best:
             val_loss_best = losses["val"]
-            save_checkpoint(f"{config.rootdir}/{config.modeldir}", state, e)
+            save_checkpoint(config.modeldir, state, e)
             logger.info(
                 f"update best model (epoch: {e} | val loss: {val_loss_best:0.4f})"
             )

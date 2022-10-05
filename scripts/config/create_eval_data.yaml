@@ -1,5 +1,4 @@
 seed: 46
-rootdir: 
 
 defaults:
   - _self_
@@ -7,3 +6,7 @@ defaults:
   - model: 
   - sampler: 
   - planner: 
+
+hydra:
+  job:
+    chdir: False

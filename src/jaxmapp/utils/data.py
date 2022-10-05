@@ -70,23 +70,6 @@ def save_instance(ins: Instance, filename: str) -> None:
     pickle.dump(ins, open(filename, "wb"))
 
 
-def check_rootdir(rootdir: str) -> str:
-    """
-    Check and modify root directory in the config file
-
-    Args:
-        rootdir (str): config.rootdir
-
-    Returns:
-        str: modified root directory
-    """
-    logger = getLogger(__name__)
-    if rootdir is None:
-        rootdir = re.split("/outputs", os.getcwd())[0]
-        logger.info(f"No rootdir was provided; set to {rootdir}")
-    return rootdir
-
-
 def get_original_config(dirname: str) -> dict:
     """
     Get original model config used with hydra

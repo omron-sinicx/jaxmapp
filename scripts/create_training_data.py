@@ -14,7 +14,7 @@ from logging import getLogger
 
 import hydra
 import jax
-from jaxmapp.utils.data import check_rootdir, save_instance
+from jaxmapp.utils.data import save_instance
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
@@ -47,11 +47,10 @@ def process(config, seed, seed_start, savedir):
 @hydra.main(config_path="config", config_name="create_training_data")
 def main(config):
     logger = getLogger(__name__)
-    config.rootdir = check_rootdir(config.rootdir)
     logger.info(f"random seed: {config.seed}")
     seed_start = 0
     for label, num_instances in config.dataset.num_instances.items():
-        savedir = f"{config.rootdir}/{config.dataset.datadir}/{label}"
+        savedir = f"{config.dataset.datadir}/{label}"
         os.makedirs(savedir, exist_ok=True)
         logger.info(f"creating {num_instances} {label} instances")
         if config.n_jobs == 1:

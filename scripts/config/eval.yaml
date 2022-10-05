@@ -1,5 +1,4 @@
 seed: 46
-rootdir: 
 
 modeldir: "model/training_hetero_k05/"
 savefile_prefix:  "${dataset.datadir}/${now:%Y-%m-%d_%H-%M-%S}"
@@ -11,3 +10,7 @@ defaults:
   - model: ctrm
   - sampler: ctrm
   - planner: pp
+
+hydra:
+  job:
+    chdir: False
