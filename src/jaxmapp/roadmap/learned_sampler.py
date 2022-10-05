@@ -65,7 +65,7 @@ def load_learned_sampler(
 
 
 @dataclass
-class DefaultSampler(DefaultSampler):
+class CTRMSampler(DefaultSampler):
     """Biased sampler using learned CTRM model"""
 
     share_roadmap: bool = False
