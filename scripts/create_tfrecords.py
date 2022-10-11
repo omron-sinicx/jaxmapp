@@ -13,7 +13,7 @@ from logging import getLogger
 
 import hydra
 import numpy as np
-from jaxmapp.utils.data import check_rootdir, load_instance, load_result
+from jaxmapp.utils.data import load_instance, load_result
 from numpy2tfrecord import Numpy2TFRecordConverter
 from tqdm import tqdm
 
@@ -21,16 +21,13 @@ from tqdm import tqdm
 @hydra.main(config_path="config", config_name="train")
 def main(config):
     logger = getLogger(__name__)
-    config.rootdir = check_rootdir(config.rootdir)
     logger.info(f"random seed: {config.seed}")
     map_size = config.dataset.instance.map_size
     logger.info(f"map size: {map_size}")
 
     for split in ["train", "val", "test"]:
-        dirname = f"{config.rootdir}/{config.dataset.datadir}/{split}"
-        filename = (
-            f"{config.rootdir}/{config.dataset.datadir}/{split}_{map_size:05d}.tfrec"
-        )
+        dirname = f"{config.dataset.datadir}/{split}"
+        filename = f"{config.dataset.datadir}/{split}_{map_size:05d}.tfrec"
         logger.info(f"dirname: {dirname}")
 
         with Numpy2TFRecordConverter(filename) as converter:

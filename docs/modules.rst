@@ -1,5 +1,5 @@
-jaxmapp
-=======
+src
+===
 
 .. toctree::
    :maxdepth: 4

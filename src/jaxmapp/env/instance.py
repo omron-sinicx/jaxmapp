@@ -67,6 +67,7 @@ class Instance:
             Instance: instance with all attributes converted to numpy array
         """
 
+        num_agents = np.array(self.num_agents)
         starts = [np.array(x, np.float64) for x in self.starts]
         goals = [np.array(x, np.float64) for x in self.goals]
         max_speeds = np.array(self.max_speeds, np.float64)
@@ -74,7 +75,7 @@ class Instance:
         goal_rads = np.array(self.goal_rads, np.float64)
         obs = ObstacleMap(np.array(self.obs.occupancy), np.array(self.obs.sdf))
         return Instance(
-            num_agents=self.num_agents,
+            num_agents=num_agents,
             starts=starts,
             goals=goals,
             max_speeds=max_speeds,
@@ -91,6 +92,7 @@ class Instance:
             Instance: instance with all attributes converted to jax.numpy array
         """
 
+        num_agents = jnp.array(self.num_agents)
         starts = jnp.array(self.starts)
         goals = jnp.array(self.goals)
         max_speeds = jnp.array(self.max_speeds)
@@ -99,7 +101,7 @@ class Instance:
         obs = ObstacleMap(jnp.array(self.obs.occupancy), jnp.array(self.obs.sdf))
 
         return Instance(
-            num_agents=self.num_agents,
+            num_agents=num_agents,
             starts=starts,
             goals=goals,
             max_speeds=max_speeds,

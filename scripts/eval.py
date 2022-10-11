@@ -18,25 +18,22 @@ import hydra
 import jax
 import numpy as np
 from flax.training.checkpoints import restore_checkpoint
-from jaxmapp.utils.data import check_rootdir, get_original_config, load_instance
+from jaxmapp.utils.data import get_original_config, load_instance
 from tqdm import tqdm
 
 
 @hydra.main(config_path="config", config_name="eval")
 def main(config):
     logger = getLogger(__name__)
-    config.rootdir = check_rootdir(config.rootdir)
     logger.info(f"random seed: {config.seed}")
     key = jax.random.PRNGKey(config.seed)
 
     sampler = hydra.utils.instantiate(config.sampler)
     if hasattr(sampler, "set_model_and_params"):
         model = hydra.utils.instantiate(config.model)
-        original_config = get_original_config(f"{config.rootdir}/{config.modeldir}")
+        original_config = get_original_config(config.modeldir)
         model.num_neighbors = original_config.model.num_neighbors
-        params = restore_checkpoint(f"{config.rootdir}/{config.modeldir}", None)[
-            "params"
-        ]
+        params = restore_checkpoint(config.modeldir, None)["params"]
         sampler.set_model_and_params(model, params)
 
     # dryrun
@@ -63,7 +60,7 @@ def main(config):
     # main run
     results = []
     num_solved = 0
-    for insfile in sorted(glob(f"{config.rootdir}/{config.dataset.datadir}/*_ins.pkl")):
+    for insfile in sorted(glob(f"{config.dataset.datadir}/*_ins.pkl")):
         logger.info(insfile)
         ins = load_instance(insfile)
         ins = ins.to_jnumpy()
@@ -94,7 +91,7 @@ def main(config):
     sampler_name = re.split("\.", config.sampler._target_)[-1]
     pickle.dump(
         [config, results],
-        open(f"{config.rootdir}/{config.savefile_prefix}_{sampler_name}.pkl", "wb"),
+        open(f"{config.savefile_prefix}_{sampler_name}.pkl", "wb"),
     )
 
 

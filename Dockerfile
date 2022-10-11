@@ -17,10 +17,8 @@ RUN pip3 install -U pip distlib setuptools wheel
 WORKDIR /tmp
 COPY README.md .
 COPY setup.py .
-COPY setup.cfg .
 COPY pyproject.toml .
-COPY jaxmapp/ jaxmapp/
-COPY cython_helper/ cython_helper/
+COPY src/ src/
 RUN pip3 install -e .[dev]
 
 WORKDIR /workspace

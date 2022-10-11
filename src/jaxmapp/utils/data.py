@@ -8,10 +8,7 @@ Affiliation: OMRON SINIC X
 
 from __future__ import annotations
 
-import os
 import pickle
-import re
-from logging import getLogger
 
 import numpy as np
 import scipy.sparse
@@ -67,24 +64,13 @@ def save_instance(ins: Instance, filename: str) -> None:
     occupancy = scipy.sparse.coo_matrix(ins.obs.occupancy)
     obs = ObstacleMap(occupancy, None)
     ins.obs = obs
+    ins.num_agents = np.array(ins.num_agents)
+    ins.starts = np.array(ins.starts)
+    ins.goals = np.array(ins.goals)
+    ins.max_speeds = np.array(ins.max_speeds)
+    ins.rads = np.array(ins.rads)
+    ins.goal_rads = np.array(ins.goal_rads)
     pickle.dump(ins, open(filename, "wb"))
-
-
-def check_rootdir(rootdir: str) -> str:
-    """
-    Check and modify root directory in the config file
-
-    Args:
-        rootdir (str): config.rootdir
-
-    Returns:
-        str: modified root directory
-    """
-    logger = getLogger(__name__)
-    if rootdir is None:
-        rootdir = re.split("/outputs", os.getcwd())[0]
-        logger.info(f"No rootdir was provided; set to {rootdir}")
-    return rootdir
 
 
 def get_original_config(dirname: str) -> dict:

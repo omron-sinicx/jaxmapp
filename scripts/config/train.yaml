@@ -1,5 +1,4 @@
 seed: 46
-rootdir: 
 
 batch_size: 50
 num_epochs: 1500 
@@ -14,3 +13,7 @@ defaults:
   - model: ctrm
   - sampler: ctrm
   - planner: 
+
+hydra:
+  job:
+    chdir: False
