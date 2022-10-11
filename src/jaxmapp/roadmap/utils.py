@@ -8,21 +8,18 @@ Affiliation: OMRON SINIC X
 
 from __future__ import annotations
 
-from functools import partial
-
 import jax
 import jax.numpy as jnp
 from chex import Array
 
 
-@partial(jax.jit, static_argnames=("num_max_steps"))
+@jax.jit
 def valid_linear_move(
     src: Array,
     dst: Array,
     max_speed: Array,
     rad: Array,
     sdf: Array,
-    num_max_steps: int = 20,
 ) -> bool:
     """
     Validate if dst is reachable from src in a single timestep
@@ -33,28 +30,30 @@ def valid_linear_move(
         max_speed (Array): agent's max speed
         rad (Array): agent's radius
         sdf (Array): singed distance function of the map
-        num_max_steps (int, optional): number of steps to check from the src. Defaults to 20.
 
     Returns:
         bool: validity (true = no collisions)
     """
 
+    map_size = sdf.shape[0]
     dist = jnp.linalg.norm(dst - src)
     uv = (dst - src) / (dist + 1e-10)
-    pts = (
-        src
-        + uv * jnp.arange(1, num_max_steps + 1).reshape((num_max_steps, 1)) * rad / 2.0
-    )
-    map_size = sdf.shape[0]
-    pts_int = jnp.minimum((pts * map_size).astype(int), map_size - 1)
-    dist_to_obs = jax.vmap(lambda p: sdf[p[0], p[1]] - rad)(pts_int).flatten()
-    dist_to_src = jnp.linalg.norm(pts - src, axis=1).flatten()
-    dist_to_obs = dist_to_obs * (dist_to_src < dist)
-    return (
-        (jnp.min(dist_to_obs) >= 0)
-        & (dist <= max_speed)
-        & (jnp.min(dst) > rad) * (jnp.max(dst) < 1 - rad)
-    )
+
+    def cond(pts):
+        p = jnp.minimum((pts * map_size).astype(int), map_size - 1)
+        return (
+            (dist <= max_speed)  # each move should be completed with a single step
+            & (
+                jnp.linalg.norm(pts - src) < dist
+            )  # pts should be an intermediate point between src and dst
+            & (sdf[p[0], p[1]] > rad)  # agent does not collide with obstacles at pts
+        )
+
+    def body(pts):
+        return pts + uv * rad
+
+    pts = jax.lax.while_loop(cond, body, src)
+    return jnp.linalg.norm(pts - src) >= dist
 
 
 def compute_linear_move_matrix(
