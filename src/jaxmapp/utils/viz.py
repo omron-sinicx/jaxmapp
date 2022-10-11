@@ -255,7 +255,7 @@ def visualize_evaluation_results(
                 y=c_,
                 ax=axes[1],
                 alpha=0.5,
-                shade=False,
+                fill=False,
                 levels=5,
                 thresh=0.3,
                 color=COLORS[i],
