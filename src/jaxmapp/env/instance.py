@@ -374,18 +374,13 @@ class InstanceGeneratorImageInput(InstanceGenerator):
 class InstanceGeneratorImageCollectionInput(InstanceGenerator):
     imagedir: str
 
-    @lru_cache()
-    def load_image_from_npyfile(self, idx: int) -> Array:
-        filename = sorted(glob(f"{self.imagedir}/*.npy"))[idx]
-        return np.load(filename)
-
-    @lru_cache()
-    def count_files(self) -> Array:
-        return len(glob(f"{self.imagedir}/*.npy"))
 
     def generate(self, key: PRNGKey) -> Instance:
         """
         Generate an instance from an image contained in the imagedir
+        Note:
+            Each image in the imagedir should be a binary map indicating 1 as an obstacle, and should be saved in npy format.
+            See tutorials/create_map.ipynb for more detail.
 
         Args:
             key (PRNGKey): jax.random.PRNGKey
@@ -393,11 +388,19 @@ class InstanceGeneratorImageCollectionInput(InstanceGenerator):
         Returns:
             Instance: MAPP problem instance
         """
+        @lru_cache()
+        def load_image_from_npyfile(imagedir:str, idx: int) -> Array:
+            filename = sorted(glob(f"{imagedir}/*.npy"))[idx]
+            return np.load(filename)
+
+        @lru_cache()
+        def count_files(imagedir:str) -> Array:
+            return len(glob(f"{imagedir}/*.npy"))
 
         key, num_agents = self.sample_num_agents(key)
-        num_files = self.count_files()
-        idx = jax.random.randint(key, 1, 0, num_files)
-        image = self.load_image_from_npyfile(idx)
+        num_files = count_files(self.imagedir)
+        idx = int(jax.random.randint(key, (1,), 0, num_files))
+        image = load_image_from_npyfile(self.imagedir, idx)
 
         assert image.shape[0] == image.shape[1]
         map_size = image.shape[0]
