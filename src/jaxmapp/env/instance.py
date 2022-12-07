@@ -370,10 +370,22 @@ class InstanceGeneratorImageInput(InstanceGenerator):
         return ins
 
 
+### helper functions for InstanceGeneratorImageCollectionInput
+@lru_cache()
+def load_image_from_npyfile(imagedir: str, idx: int) -> Array:
+    filename = sorted(glob(f"{imagedir}/*.npy"))[idx]
+    image = np.load(filename)
+    return image
+
+
+@lru_cache()
+def count_files(imagedir: str) -> Array:
+    return len(glob(f"{imagedir}/*.npy"))
+
+
 @dataclass
 class InstanceGeneratorImageCollectionInput(InstanceGenerator):
     imagedir: str
-
 
     def generate(self, key: PRNGKey) -> Instance:
         """
@@ -388,15 +400,6 @@ class InstanceGeneratorImageCollectionInput(InstanceGenerator):
         Returns:
             Instance: MAPP problem instance
         """
-        @lru_cache()
-        def load_image_from_npyfile(imagedir:str, idx: int) -> Array:
-            filename = sorted(glob(f"{imagedir}/*.npy"))[idx]
-            return np.load(filename)
-
-        @lru_cache()
-        def count_files(imagedir:str) -> Array:
-            return len(glob(f"{imagedir}/*.npy"))
-
         key, num_agents = self.sample_num_agents(key)
         num_files = count_files(self.imagedir)
         idx = int(jax.random.randint(key, (1,), 0, num_files))

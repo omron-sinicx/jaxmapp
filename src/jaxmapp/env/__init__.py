@@ -1,1 +1,6 @@
-from .instance import Instance, InstanceGeneratorCircleObs, InstanceGeneratorImageInput, InstanceGeneratorImageCollectionInput
+from .instance import (
+    Instance,
+    InstanceGeneratorCircleObs,
+    InstanceGeneratorImageCollectionInput,
+    InstanceGeneratorImageInput,
+)
