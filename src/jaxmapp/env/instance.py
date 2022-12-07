@@ -9,6 +9,8 @@ Affiliation: OMRON SINIC X
 from __future__ import annotations
 
 import math
+from functools import lru_cache
+from glob import glob
 
 import jax
 import jax.numpy as jnp
@@ -128,6 +130,28 @@ class InstanceGenerator:
             self.rads_cands = [i for i in self.rads_cands]
 
         self._generate = self.build_compiled_generate_fn()
+        self.sample_num_agents = self.build_sample_num_agents()
+
+    def build_sample_num_agents(self):
+        def sample_num_agents(key: PRNGKey) -> tuple[PRNGKey, Array]:
+            """
+            Generate random number of num_agents within num_agents_min and num_agents_max+1
+
+            Args:
+                key (PRNGKey): jax PRNG key
+
+            Returns:
+                tuple[PRNGKey, Array]: renewed key and num_agents
+            """
+
+            key0, key = jax.random.split(key)
+            num_agents = jax.random.randint(
+                key0, (1,), minval=self.num_agents_min, maxval=self.num_agents_max + 1
+            )
+
+            return key, num_agents
+
+        return jax.jit(sample_num_agents)
 
     def build_compiled_generate_fn(self):
         def _generate_ins_with_num_agents_max(
@@ -269,12 +293,7 @@ class InstanceGeneratorCircleObs(InstanceGenerator):
         if self.num_obs == 0:
             return self.generate_wo_obs(key)
 
-        key0, key = jax.random.split(key)
-        num_agents = int(
-            jax.random.randint(
-                key0, (1,), minval=self.num_agents_min, maxval=self.num_agents_max + 1
-            )
-        )
+        key, num_agents = self.sample_num_agents(key)
 
         circle_obs = jax.random.uniform(key, shape=(self.num_obs, 3))
         circle_obs = circle_obs.at[:, 2].multiply(
@@ -289,7 +308,7 @@ class InstanceGeneratorCircleObs(InstanceGenerator):
 
         obs = ObstacleMap(occupancy, sdf)
 
-        ins = self._generate(key, num_agents, obs)
+        ins = self._generate(key, int(num_agents), obs)
         assert not (
             jnp.any(jnp.isinf(ins.starts)) | jnp.any(jnp.isinf(ins.goals))
         ), "Invalid problem instance. try different parameters."
@@ -306,18 +325,13 @@ class InstanceGeneratorCircleObs(InstanceGenerator):
             Instance: MAPP problem instance with no obstacles
         """
 
-        key0, key = jax.random.split(key)
-        num_agents = int(
-            jax.random.randint(
-                key0, (1,), minval=self.num_agents_min, maxval=self.num_agents_max + 1
-            )
-        )
+        key, num_agents = self.sample_num_agents(key)
 
         occupancy = jnp.zeros((self.map_size, self.map_size))
         sdf = jnp.ones((self.map_size, self.map_size))
         obs = ObstacleMap(occupancy, sdf)
 
-        ins = self._generate(key, num_agents, obs)
+        ins = self._generate(key, int(num_agents), obs)
         assert not (
             jnp.any(jnp.isinf(ins.starts)) | jnp.any(jnp.isinf(ins.goals))
         ), "Invalid problem instance. try different parameters."
@@ -340,12 +354,8 @@ class InstanceGeneratorImageInput(InstanceGenerator):
         """
 
         assert self.image.shape[0] == self.image.shape[1]
-        key0, key = jax.random.split(key)
-        num_agents = int(
-            jax.random.randint(
-                key0, (1,), minval=self.num_agents_min, maxval=self.num_agents_max + 1
-            )
-        )
+        key, num_agents = self.sample_num_agents(key)
+
         map_size = self.image.shape[0]
         occupancy = self.image
         cmap2d = CMap2D()
@@ -353,7 +363,51 @@ class InstanceGeneratorImageInput(InstanceGenerator):
         sdf = cmap2d.as_sdf()
         obs = ObstacleMap(occupancy, sdf)
 
-        ins = self._generate(key, num_agents, obs)
+        ins = self._generate(key, int(num_agents), obs)
+        assert not (
+            jnp.any(jnp.isinf(ins.starts)) | jnp.any(jnp.isinf(ins.goals))
+        ), "Invalid problem instance. try different parameters."
+        return ins
+
+
+@dataclass
+class InstanceGeneratorImageCollectionInput(InstanceGenerator):
+    imagedir: str
+
+    @lru_cache()
+    def load_image_from_npyfile(self, idx: int) -> Array:
+        filename = sorted(glob(f"{self.imagedir}/*.npy"))[idx]
+        return np.load(filename)
+
+    @lru_cache()
+    def count_files(self) -> Array:
+        return len(glob(f"{self.imagedir}/*.npy"))
+
+    def generate(self, key: PRNGKey) -> Instance:
+        """
+        Generate an instance from an image contained in the imagedir
+
+        Args:
+            key (PRNGKey): jax.random.PRNGKey
+
+        Returns:
+            Instance: MAPP problem instance
+        """
+
+        key, num_agents = self.sample_num_agents(key)
+        num_files = self.count_files()
+        idx = jax.random.randint(key, 1, 0, num_files)
+        image = self.load_image_from_npyfile(idx)
+
+        assert image.shape[0] == image.shape[1]
+        map_size = image.shape[0]
+        occupancy = image
+        cmap2d = CMap2D()
+        cmap2d.from_array(occupancy, (0, 0), 1.0 / map_size)
+        sdf = cmap2d.as_sdf()
+        obs = ObstacleMap(occupancy, sdf)
+
+        ins = self._generate(key, int(num_agents), obs)
         assert not (
             jnp.any(jnp.isinf(ins.starts)) | jnp.any(jnp.isinf(ins.goals))
         ), "Invalid problem instance. try different parameters."
