@@ -5,6 +5,7 @@ params:
 num_samples: 50
 num_rw_samples: 15
 max_T: 64
+rw_type: "uniform"
 prob_rw_decay_high: 25.0
 prob_rw_decay_low: 5.0
 prob_rw_after_goal: 1.0
