@@ -27,17 +27,22 @@ def process(config, seed, seed_start, savedir):
 
     while not success:
         key0, key1, key = jax.random.split(key, 3)
-        ins = generator.generate(key0)
-
-        sampler = hydra.utils.instantiate(config.sampler)
-        trms = sampler.construct_trms(key1, ins)
-        planner = hydra.utils.instantiate(config.planner)
-        res = planner.solve(ins.to_numpy(), trms)
-        success = res.solved
-        if not success:
+        try:
+            ins = generator.generate(key0)
+        except:
+            print("Exception: could not initialize valid start/goal pairs")
             num_trials += 1
+        else:
+            sampler = hydra.utils.instantiate(config.sampler)
+            trms = sampler.construct_trms(key1, ins)
+            planner = hydra.utils.instantiate(config.planner)
+            res = planner.solve(ins.to_numpy(), trms)
+            success = res.solved
+            if not success:
+                num_trials += 1
+
         if num_trials == config.num_max_trials:
-            print(f"failed {num_trials} times -- break")
+            print(f"Failed {num_trials} times -- break")
             return None, None
 
     save_instance(ins, f"{savedir}/{seed:08d}_ins.pkl")

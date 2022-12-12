@@ -8,6 +8,7 @@ Affiliation: OMRON SINIC X
 
 from __future__ import annotations
 
+import re
 from glob import glob
 from logging import getLogger
 
@@ -22,12 +23,16 @@ from tqdm import tqdm
 def main(config):
     logger = getLogger(__name__)
     logger.info(f"random seed: {config.seed}")
-    map_size = config.dataset.instance.map_size
-    logger.info(f"map size: {map_size}")
+    if "map_size" in config.dataset.instance:
+        map_info = f"{config.dataset.instance.map_size:05d}"
+        logger.info(f"map size: {map_info}")
+    else:
+        map_info = re.sub("/", "_", config.dataset.instance.imagedir)
+        logger.info(f"map: {map_info}")
 
     for split in ["train", "val", "test"]:
         dirname = f"{config.dataset.datadir}/{split}"
-        filename = f"{config.dataset.datadir}/{split}_{map_size:05d}.tfrec"
+        filename = f"{config.dataset.datadir}/{split}_{map_info}.tfrec"
         logger.info(f"dirname: {dirname}")
 
         with Numpy2TFRecordConverter(filename) as converter:

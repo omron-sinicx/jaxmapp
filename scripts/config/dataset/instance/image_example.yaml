@@ -1,0 +1,6 @@
+_target_: jaxmapp.env.instance.InstanceGeneratorImageCollectionInput
+num_agents_min: 5
+num_agents_max: 5
+max_speeds_cands: [0.1]
+rads_cands: [0.075]
+imagedir: "data_example/map_data"

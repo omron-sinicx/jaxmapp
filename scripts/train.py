@@ -9,6 +9,7 @@ Affiliation: OMRON SINIC X
 from __future__ import annotations
 
 import pickle
+import re
 from functools import partial
 from logging import getLogger
 
@@ -68,12 +69,16 @@ def step(key, batch, state, kl_weight, ind_weight, is_training=True):
 def main(config):
     logger = getLogger(__name__)
     logger.info(f"random seed: {config.seed}")
-    map_size = config.dataset.instance.map_size
-    logger.info(f"map size: {map_size}")
+    if "map_size" in config.dataset.instance:
+        map_info = f"{config.dataset.instance.map_size:05d}"
+        logger.info(f"map size: {map_info}")
+    else:
+        map_info = re.sub("/", "_", config.dataset.instance.imagedir)
+        logger.info(f"map: {map_info}")
 
     datasets = dict()
     for split in ["train", "val"]:
-        filename = f"{config.dataset.datadir}/{split}_{map_size:05d}.tfrec"
+        filename = f"{config.dataset.datadir}/{split}_{map_info}.tfrec"
         dataset = build_dataset_from_tfrecord(filename)
         dataset = (
             dataset.shuffle(config.batch_size * 100, seed=config.seed)
