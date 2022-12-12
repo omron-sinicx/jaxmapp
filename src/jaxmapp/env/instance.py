@@ -372,9 +372,9 @@ class InstanceGeneratorImageInput(InstanceGenerator):
 
 ### helper functions for InstanceGeneratorImageCollectionInput
 @lru_cache()
-def load_image_from_npyfile(imagedir: str, idx: int) -> Array:
-    filename = sorted(glob(f"{imagedir}/*.npy"))[idx]
-    image = np.load(filename)
+def load_image_from_txtfile(imagedir: str, idx: int) -> Array:
+    filename = sorted(glob(f"{imagedir}/*.txt"))[idx]
+    image = np.loadtxt(filename)
     return image
 
 
@@ -403,7 +403,7 @@ class InstanceGeneratorImageCollectionInput(InstanceGenerator):
         key, num_agents = self.sample_num_agents(key)
         num_files = count_files(self.imagedir)
         idx = int(jax.random.randint(key, (1,), 0, num_files))
-        image = load_image_from_npyfile(self.imagedir, idx)
+        image = load_image_from_txtfile(self.imagedir, idx)
 
         assert image.shape[0] == image.shape[1]
         map_size = image.shape[0]
