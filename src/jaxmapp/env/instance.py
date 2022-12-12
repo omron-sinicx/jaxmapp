@@ -380,7 +380,7 @@ def load_image_from_txtfile(imagedir: str, idx: int) -> Array:
 
 @lru_cache()
 def count_files(imagedir: str) -> Array:
-    return len(glob(f"{imagedir}/*.npy"))
+    return len(glob(f"{imagedir}/*.txt"))
 
 
 @dataclass
@@ -391,7 +391,7 @@ class InstanceGeneratorImageCollectionInput(InstanceGenerator):
         """
         Generate an instance from an image contained in the imagedir
         Note:
-            Each image in the imagedir should be a binary map indicating 1 as an obstacle, and should be saved in npy format.
+            Each image in the imagedir should be a binary map indicating 1 as an obstacle, and should be saved in txt format.
             See tutorials/create_map.ipynb for more detail.
 
         Args:
