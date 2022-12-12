@@ -79,7 +79,9 @@ class CTRMSampler(DefaultSampler):
         15  # number of trajectories to sample with high random-walk decay
     )
     max_T: int = 64  # maximum number of timesteps for each traj
-    rw_type: str = "uniform"   # types of random walk | should be either "uniform" or "normal"
+    rw_type: str = (
+        "uniform"  # types of random walk | should be either "uniform" or "normal"
+    )
     prob_rw_decay_high: float = (
         25.0  # parameter for invoking random walk in learned trajectories
     )
@@ -182,9 +184,7 @@ class CTRMSampler(DefaultSampler):
         )  # change it to (name_agents, max_T, num_trajs, 2)
         return pos_carry
 
-
     def build_sample_next(self):
-
         def sample_next(
             t: int,
             loop_carry: list[Array],
@@ -231,7 +231,10 @@ class CTRMSampler(DefaultSampler):
             )
             prob_random_walk = jax.vmap(
                 lambda x: jax.lax.cond(
-                    x, lambda _: self.prob_rw_after_goal, lambda _: prob_random_walk, None
+                    x,
+                    lambda _: self.prob_rw_after_goal,
+                    lambda _: prob_random_walk,
+                    None,
                 )
             )(has_reached_goals)
 
@@ -250,7 +253,9 @@ class CTRMSampler(DefaultSampler):
 
             # clip next motion to ensure validity
             next_motion_mag = next_motion_learned[:, 2]
-            next_motion_mag = jnp.minimum(next_motion_mag, max_speeds * self.max_speed_discount)
+            next_motion_mag = jnp.minimum(
+                next_motion_mag, max_speeds * self.max_speed_discount
+            )
             next_motion_learned = next_motion_learned.at[:, 2].set(next_motion_mag)
             next_motion_dir = next_motion_learned[:, :2]
             vec_mag = jnp.expand_dims(jnp.linalg.norm(next_motion_dir, axis=-1), -1)
@@ -261,17 +266,29 @@ class CTRMSampler(DefaultSampler):
             def sample_uniform_i(key, max_speed):
 
                 if self.rw_type == "uniform":
-                    random_vals = jax.random.uniform(key, shape=(2 * self.num_rw_attempts,))
+                    random_vals = jax.random.uniform(
+                        key, shape=(2 * self.num_rw_attempts,)
+                    )
                 else:
-                    random_vals = jnp.clip(jnp.abs(jax.random.normal(key, shape=(2 * self.num_rw_attempts,))), a_min=0., a_max=1.)
-                mag = max_speed * random_vals[:self.num_rw_attempts] * self.max_speed_discount
-                theta = jnp.pi * 2 * random_vals[self.num_rw_attempts:]
+                    random_vals = jnp.clip(
+                        jnp.abs(
+                            jax.random.normal(key, shape=(2 * self.num_rw_attempts,))
+                        ),
+                        a_min=0.0,
+                        a_max=1.0,
+                    )
+                mag = (
+                    max_speed
+                    * random_vals[: self.num_rw_attempts]
+                    * self.max_speed_discount
+                )
+                theta = jnp.pi * 2 * random_vals[self.num_rw_attempts :]
                 next_motion_ = jnp.vstack((jnp.sin(theta), jnp.cos(theta), mag)).T
                 return next_motion_
 
-            next_motion_random = jax.vmap(sample_uniform_i, in_axes=(None, 0), out_axes=1)(
-                key, max_speeds
-            )
+            next_motion_random = jax.vmap(
+                sample_uniform_i, in_axes=(None, 0), out_axes=1
+            )(key, max_speeds)
             next_motion_learned = jax.vmap(
                 lambda x, nmr, nml: jax.lax.cond(
                     jax.random.uniform(key1) < x, lambda _: nmr, lambda _: nml, None
@@ -280,10 +297,16 @@ class CTRMSampler(DefaultSampler):
             next_motion_learned = jnp.expand_dims(next_motion_learned, 0)
 
             next_motion = jnp.concatenate(
-                (next_motion_learned, next_motion_random, jnp.zeros_like(next_motion_learned)),
+                (
+                    next_motion_learned,
+                    next_motion_random,
+                    jnp.zeros_like(next_motion_learned),
+                ),
                 axis=0,
             )
-            next_pos_cands = (next_motion[:, :, :2] * next_motion[:, :, 2:3]) + current_pos
+            next_pos_cands = (
+                next_motion[:, :, :2] * next_motion[:, :, 2:3]
+            ) + current_pos
             # determine next position
             validity = jax.vmap(
                 jax.vmap(valid_linear_move, in_axes=(0, 0, 0, 0, None)),
@@ -301,11 +324,15 @@ class CTRMSampler(DefaultSampler):
                 - jax.lax.fori_loop(
                     0,
                     self.num_rw_attempts + 2,
-                    lambda i, x: jax.lax.cond(x[0][i], lambda _: [x[0], i], lambda _: x, None),
+                    lambda i, x: jax.lax.cond(
+                        x[0][i], lambda _: [x[0], i], lambda _: x, None
+                    ),
                     [x, 0],
                 )[1]
             )(jnp.fliplr(validity))
-            next_pos = jax.vmap(lambda x, y: x[y], in_axes=(1, 0))(next_pos_cands, selected_id)
+            next_pos = jax.vmap(lambda x, y: x[y], in_axes=(1, 0))(
+                next_pos_cands, selected_id
+            )
 
             # update positions and pack everything back into loop_carry
             previous_pos = current_pos

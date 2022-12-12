@@ -1,6 +1,6 @@
 """Baseclass for multi-agent path planner
 
-Author: Keisuke Okumura
+Author: Keisuke Okumura & Ryo Yonetani
 
 Affiliation: Tokyo Institute of Technology, OMRON SINIC X
 
@@ -142,14 +142,14 @@ class Planner(metaclass=ABCMeta):
         self.info(f"_solve is done, {self.elapsed} sec")
 
         # validate solution
-        if self.validate() != self.solved:
+        if self.validate(self.solution) != self.solved:
             logger.error("inconsistent planner")
 
         # set result
         if self.solved:
             return Result(
                 solved=self.solved,
-                num_agents=ins.num_agents,
+                num_agents=self.ins.num_agents,
                 paths=self.solution,
                 name_planner=self.get_name(),
                 elapsed_planner=self.elapsed,
@@ -165,7 +165,7 @@ class Planner(metaclass=ABCMeta):
         else:
             return Result(
                 solved=self.solved,
-                num_agents=ins.num_agents,
+                num_agents=self.ins.num_agents,
                 name_planner=self.get_name(),
                 elapsed_planner=self.elapsed,
                 cnt_static_collide=self.cnt_static_collide,
@@ -173,6 +173,39 @@ class Planner(metaclass=ABCMeta):
                 lowlevel_expanded=self.lowlevel_expanded,
                 lowlevel_explored=self.lowlevel_explored,
             )
+
+    def sparsify(self, step_size: int) -> Result:
+        """
+        Sparsify the solution paths by subsampling them with `step_size`
+
+        Args:
+            step (int): step size to subsample solution paths
+
+        Returns:
+            Result: Sparsified result. Remain unchanged if the sparsification failed.
+        """
+        new_solution = [
+            [x for x in path if np.mod(x.t, step_size) == 0] + [path[-1]]
+            for path in self.solution
+        ]
+        if not self.validate(new_solution):
+            logger.error("Sparsification failed")
+            new_solution = self.solution
+        return Result(
+            solved=self.solved,
+            num_agents=self.ins.num_agents,
+            paths=new_solution,
+            name_planner=self.get_name(),
+            elapsed_planner=self.elapsed,
+            sum_of_costs=self.get_sum_of_costs(self.solution),
+            maximum_costs=self.get_maximum_costs(self.solution),
+            sum_of_travel_dists=self.get_sum_of_travel_dists(self.solution),
+            maximum_travel_dists=self.get_maximum_travel_dists(self.solution),
+            cnt_static_collide=self.cnt_static_collide,
+            cnt_continuous_collide=self.cnt_continuous_collide,
+            lowlevel_expanded=self.lowlevel_expanded,
+            lowlevel_explored=self.lowlevel_explored,
+        )
 
     @abstractmethod
     def _solve(self) -> None:
@@ -184,7 +217,7 @@ class Planner(metaclass=ABCMeta):
         """solver name"""
         pass
 
-    def validate(self) -> bool:
+    def validate(self, solution: np.array) -> bool:
         """validate obtained solution
 
         Returns:
@@ -194,10 +227,7 @@ class Planner(metaclass=ABCMeta):
             return False
         # check starts
         if not all(
-            [
-                all(path[0].pos == self.ins.starts[i])
-                for i, path in enumerate(self.solution)
-            ]
+            [all(path[0].pos == self.ins.starts[i]) for i, path in enumerate(solution)]
         ):
             logger.error("start location is invalid")
             return False
@@ -206,32 +236,34 @@ class Planner(metaclass=ABCMeta):
             [
                 np.linalg.norm(path[-1].pos - self.ins.goals[i])
                 <= self.ins.goal_rads[i]
-                for i, path in enumerate(self.solution)
+                for i, path in enumerate(solution)
             ]
         ):
             logger.error("goal location is invalid")
             return False
 
-        T = self.solution[0][-1].t
-        for t in range(1, T + 1):
+        for t in range(1, len(solution[0][-1]) + 1):
             for i in range(self.ins.num_agents):
-                loc_i_t = self.solution[i][t].pos
-                loc_i_t_prev = self.solution[i][t - 1].pos
+                loc_i = solution[i][t].pos
+                loc_i_prev = solution[i][t - 1].pos
                 rad_i = self.ins.rads[i]
+                time_i = solution[i][t].t
+                time_i_prev = solution[i][t - 1].t
+                max_speed_i = self.ins.max_speeds[i]
                 # check continuity
-                if np.linalg.norm(loc_i_t - loc_i_t_prev) > self.ins.max_speeds[i]:
-                    logger.error(
-                        f"invalid move at t={t-1}:" f"{loc_i_t_prev} -> {loc_i_t}"
-                    )
+                if np.linalg.norm(loc_i - loc_i_prev) > max_speed_i * (
+                    time_i - time_i_prev
+                ):
+                    logger.error(f"invalid move at t={t-1}:" f"{loc_i_prev} -> {loc_i}")
                     return False
                 # check collisions
                 for j in range(i + 1, self.ins.num_agents):
                     if self.collide_dynamic_agents(
-                        loc_i_t_prev,
-                        loc_i_t,
+                        loc_i_prev,
+                        loc_i,
                         rad_i,
-                        self.solution[j][t - 1].pos,
-                        self.solution[j][t].pos,
+                        solution[j][t - 1].pos,
+                        solution[j][t].pos,
                         self.ins.rads[j],
                     ):
                         logger.error("conflict")
