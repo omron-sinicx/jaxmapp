@@ -121,11 +121,51 @@ class Planner(metaclass=ABCMeta):
         if self.verbose > 0:
             logger.debug(msg)
 
-    def solve(self, ins: Instance, trms: list[TimedRoadmap]) -> Result:
-        """main function"""
+    def solve(
+        self,
+        instance: Instance,
+        trms: list[TimedRoadmap],
+        sparsify_time_steps: int = None,
+    ) -> Result:
+        """
+        Solve MAPP
+
+        Args:
+            instance (Instance): Problem instance
+            trms (list[TimedRoadmap]): Timed roadmaps constructed by `sampler.construct_trms`
+            sparsify_time_steps (int, optional): Optional time steps to sparsify solution paths if possible. Defaults to None.
+
+        Returns:
+            Result: Planning result
+
+        Note:
+            If an integer is set to `sparsify_time_steps`, this function will try to sparsify (or simplify)
+            solution paths by subsampling them with the specified time steps.
+
+            For example, suppose that you want to solve a problem instance with the max_speed of agents originally 0.2.
+            But let's first create a problem instance and timed roadmaps by specifying smaller max_speed, e.g., 0.05.
+
+            ```python
+            generator = InstanceGeneratorCircleObs(..., max_speeds_cands=[0.05])
+            ins = generator.generate(key)
+            random_sampler = RandomSampler(share_roadmap=True, num_samples=1600, max_T=64)
+            trms_random = random_sampler.construct_trms(key, ins)
+            ```
+
+            Then, solve the problem with `sparsify_time_steps=4`:
+
+            ```python
+            pp = PrioritizedPlanning(verbose=0)
+            res = pp.solve(ins.to_numpy(), trms_random, sparsify_time_steps=4)
+            ```
+
+            This will provide a solution with first with max_speed=0.05, and then try to make it to 4x sparser.
+            The sparsified solution is validated with max_speed * time_sptes = 0.05 * 4 = 0.2, satisfying the original max_speed.
+        """
+
         self.info(f"_solve is started, time_limit: {self.time_limit} sec")
         self.init_status()
-        self.ins = ins
+        self.ins = instance
         self.trms = trms
 
         @timeout_decorator.timeout(self.time_limit)
@@ -142,11 +182,15 @@ class Planner(metaclass=ABCMeta):
         self.info(f"_solve is done, {self.elapsed} sec")
 
         # validate solution
-        if self.validate(self.solution) != self.solved:
+        if self.validate(self.ins, self.solution) != self.solved:
             logger.error("inconsistent planner")
 
         # set result
         if self.solved:
+
+            if sparsify_time_steps is not None:
+                self.solution = self.sparsify(sparsify_time_steps)
+
             return Result(
                 solved=self.solved,
                 num_agents=self.ins.num_agents,
@@ -174,38 +218,28 @@ class Planner(metaclass=ABCMeta):
                 lowlevel_explored=self.lowlevel_explored,
             )
 
-    def sparsify(self, step_size: int) -> Result:
+    def sparsify(self, time_steps: int) -> np.array:
         """
-        Sparsify the solution paths by subsampling them with `step_size`
+        Sparsify the solution paths by subsampling them with `time_steps`.
+        Return the original solution if the sparsification failed.
 
         Args:
             step (int): step size to subsample solution paths
 
         Returns:
-            Result: Sparsified result. Remain unchanged if the sparsification failed.
+            np.array: Sparsified result. Remain unchanged if the sparsification failed.
         """
         new_solution = [
-            [x for x in path if np.mod(x.t, step_size) == 0] + [path[-1]]
+            [x for x in path if np.mod(x.t, time_steps) == 0] + [path[-1]]
             for path in self.solution
         ]
-        if not self.validate(new_solution):
+        if not self.validate(
+            self.ins.replace(max_speeds=self.ins.max_speeds * time_steps), new_solution
+        ):
             logger.error("Sparsification failed")
             new_solution = self.solution
-        return Result(
-            solved=self.solved,
-            num_agents=self.ins.num_agents,
-            paths=new_solution,
-            name_planner=self.get_name(),
-            elapsed_planner=self.elapsed,
-            sum_of_costs=self.get_sum_of_costs(self.solution),
-            maximum_costs=self.get_maximum_costs(self.solution),
-            sum_of_travel_dists=self.get_sum_of_travel_dists(self.solution),
-            maximum_travel_dists=self.get_maximum_travel_dists(self.solution),
-            cnt_static_collide=self.cnt_static_collide,
-            cnt_continuous_collide=self.cnt_continuous_collide,
-            lowlevel_expanded=self.lowlevel_expanded,
-            lowlevel_explored=self.lowlevel_explored,
-        )
+
+        return new_solution
 
     @abstractmethod
     def _solve(self) -> None:
@@ -217,7 +251,7 @@ class Planner(metaclass=ABCMeta):
         """solver name"""
         pass
 
-    def validate(self, solution: np.array) -> bool:
+    def validate(self, ins: Instance, solution: np.array) -> bool:
         """validate obtained solution
 
         Returns:
@@ -227,15 +261,14 @@ class Planner(metaclass=ABCMeta):
             return False
         # check starts
         if not all(
-            [all(path[0].pos == self.ins.starts[i]) for i, path in enumerate(solution)]
+            [all(path[0].pos == ins.starts[i]) for i, path in enumerate(solution)]
         ):
             logger.error("start location is invalid")
             return False
         # check goals
         if not all(
             [
-                np.linalg.norm(path[-1].pos - self.ins.goals[i])
-                <= self.ins.goal_rads[i]
+                np.linalg.norm(path[-1].pos - ins.goals[i]) <= ins.goal_rads[i]
                 for i, path in enumerate(solution)
             ]
         ):
@@ -243,13 +276,13 @@ class Planner(metaclass=ABCMeta):
             return False
 
         for t in range(1, len(solution[0][-1]) + 1):
-            for i in range(self.ins.num_agents):
+            for i in range(ins.num_agents):
                 loc_i = solution[i][t].pos
                 loc_i_prev = solution[i][t - 1].pos
-                rad_i = self.ins.rads[i]
+                rad_i = ins.rads[i]
                 time_i = solution[i][t].t
                 time_i_prev = solution[i][t - 1].t
-                max_speed_i = self.ins.max_speeds[i]
+                max_speed_i = ins.max_speeds[i]
                 # check continuity
                 if np.linalg.norm(loc_i - loc_i_prev) > max_speed_i * (
                     time_i - time_i_prev
@@ -257,14 +290,14 @@ class Planner(metaclass=ABCMeta):
                     logger.error(f"invalid move at t={t-1}:" f"{loc_i_prev} -> {loc_i}")
                     return False
                 # check collisions
-                for j in range(i + 1, self.ins.num_agents):
+                for j in range(i + 1, ins.num_agents):
                     if self.collide_dynamic_agents(
                         loc_i_prev,
                         loc_i,
                         rad_i,
                         solution[j][t - 1].pos,
                         solution[j][t].pos,
-                        self.ins.rads[j],
+                        ins.rads[j],
                     ):
                         logger.error("conflict")
                         return False

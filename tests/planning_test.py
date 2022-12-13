@@ -30,3 +30,5 @@ def test_pp(setup):
     planner = PP(verbose=1)
     res = planner.solve(ins.to_numpy(), trms)
     print(f"{res=}")
+    res = planner.solve(ins.to_numpy(), trms, sparsify_time_steps=2)
+    print(f"{res=}")
